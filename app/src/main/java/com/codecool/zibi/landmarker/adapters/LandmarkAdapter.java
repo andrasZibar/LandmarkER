@@ -7,27 +7,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.codecool.zibi.landmarker.R;
 
 public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.LandmarkAdapterViewHolder>{
     private String[] mLandmarkData;
 
     final private LandmarkAdapterOnClickHandler mClickHandler;
+    final private LandmarkAdapterOnLongClickHandler mLongClickHandler;
 
     public interface LandmarkAdapterOnClickHandler{
         void onClick(String landmarkData);
     }
 
-    public LandmarkAdapter(LandmarkAdapterOnClickHandler handler) {
-
-        mClickHandler = handler;
+    public interface LandmarkAdapterOnLongClickHandler{
+        boolean onLongClick(Toast toast);
     }
 
-    // TODO (5) Implement OnClickListener in the ForecastAdapterViewHolder class
-    /**
-     * Cache of the children views for a forecast list item.
-     */
-    public class LandmarkAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+
+    public LandmarkAdapter(LandmarkAdapterOnClickHandler clickHandler, LandmarkAdapterOnLongClickHandler longClickHandler){
+        mClickHandler = clickHandler;
+        mLongClickHandler = longClickHandler;
+    }
+
+
+    public class LandmarkAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         public final TextView mLandmarkTextView;
         public final TextView mDistanceTextView;
 
@@ -37,6 +42,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
             mDistanceTextView = view.findViewById(R.id.tv_landmark_distance);
 
             view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
         }
 
         @Override
@@ -46,6 +52,13 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
             mClickHandler.onClick(oneSpecificLandmark);
         }
 
+        @Override
+        public boolean onLongClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            Toast toast = Toast.makeText(v.getContext(), "Adapterpozi: " + adapterPosition, Toast.LENGTH_LONG);
+            mLongClickHandler.onLongClick(toast);
+            return true;
+        }
     }
 
 
@@ -73,7 +86,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
 
     @Override
     public int getItemCount() {
-        if (null == mLandmarkData) return 0;
+        if (mLandmarkData ==  null) return 0;
         return mLandmarkData.length;
     }
 

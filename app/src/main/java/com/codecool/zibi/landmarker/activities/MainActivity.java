@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.codecool.zibi.landmarker.adapters.LandmarkAdapter;
 import com.codecool.zibi.landmarker.R;
 import com.codecool.zibi.landmarker.utilities.HereJsonUtils;
@@ -46,7 +47,7 @@ import java.net.URL;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
-public class MainActivity extends AppCompatActivity implements LandmarkAdapter.LandmarkAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements LandmarkAdapter.LandmarkAdapterOnClickHandler, LandmarkAdapter.LandmarkAdapterOnLongClickHandler {
 
     private RecyclerView mRecyclerView;
     private LandmarkAdapter mLandmarkAdapter;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        mLandmarkAdapter = new LandmarkAdapter(this);
+        mLandmarkAdapter = new LandmarkAdapter(this, this);
         mRecyclerView.setAdapter(mLandmarkAdapter);
 
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            showErrorMessage();
             return;
         }
         mFusedLocationClient.getLastLocation()
@@ -126,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
                         }
                     }
                 });
+
 
 
     }
@@ -153,6 +156,13 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
         intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, landmarkName);
         startActivity(intentToStartDetailActivity);
+
+    }
+
+    @Override
+    public boolean onLongClick(Toast toast) {
+        toast.show();
+        return true;
     }
 
     public class FetchLandmarkTask extends AsyncTask<double[], Void, String[]> {
