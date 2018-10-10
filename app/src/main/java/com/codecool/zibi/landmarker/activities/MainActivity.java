@@ -15,10 +15,14 @@
  */
 package com.codecool.zibi.landmarker.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +37,9 @@ import com.codecool.zibi.landmarker.adapters.LandmarkAdapter;
 import com.codecool.zibi.landmarker.R;
 import com.codecool.zibi.landmarker.utilities.HereJsonUtils;
 import com.codecool.zibi.landmarker.utilities.NetworkUtils;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.net.URL;
@@ -43,10 +50,10 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
 
     private RecyclerView mRecyclerView;
     private LandmarkAdapter mLandmarkAdapter;
-
     private TextView mErrorMessageDisplay;
-
     private ProgressBar mLoadingIndicator;
+    private FusedLocationProviderClient mFusedLocationClient;
+
 
     private final double SAN_FRAN_LAT = 37.8075;
     private final double SAN_FRAN_LON = -122.4725;
@@ -70,106 +77,57 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     double lon;
     int locationID;
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        System.out.println("TAG, onSavedInstanceState");
-
-        double[] location = {lat, lon};
-        outState.putDoubleArray("savedLocation", location);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedState)
-    {
-        System.out.println("TAG, onRestoreInstanceState");
-        double[] location = savedState.getDoubleArray("savedLocation");
-        if (location != null){
-            lat = location[0];
-            lon = location[1];
-        }
-
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mRecyclerView = findViewById(R.id.recyclerview_landmark);
-
         mErrorMessageDisplay = findViewById(R.id.tv_error_message_display);
-
 
         LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-
         mRecyclerView.setLayoutManager(layoutManager);
-
-
         mRecyclerView.setHasFixedSize(true);
 
-
         mLandmarkAdapter = new LandmarkAdapter(this);
-
         mRecyclerView.setAdapter(mLandmarkAdapter);
-
 
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
 
         loadLandmarkData();
     }
 
-    private void loadLandmarkData(Bundle savedInstanceState) {
-
-        double[] location = savedInstanceState.getDoubleArray("savedLocation");
-
-        new FetchLandmarkTask().execute(location);
-    }
-
 
     private void loadLandmarkData() {
         showLandmarkDataView();
 
-        Intent intentThatStartedActivity = getIntent();
-
-        if (intentThatStartedActivity.hasExtra(Intent.ACTION_CALL_BUTTON)){
-            locationID = intentThatStartedActivity.getIntExtra(Intent.ACTION_CALL_BUTTON, 666);
-
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            double[] locationArray = {location.getLatitude(), location.getLongitude()};
+                            new FetchLandmarkTask().execute(locationArray);
+                        } else {
+                            showErrorMessage();
+                        }
+                    }
+                });
 
-        switch (locationID) {
-            case 666:  lat = 36.6666;
-                lon = -112.6666;
-                break;
-            case R.id.btn_los_angeles:  lat = LA_LAT;
-                lon = LA_LON;
-                break;
-            case R.id.btn_chicago:  lat = CHICAGO_LAT;
-                lon = CHICAGO_LON;
-                break;
-            case R.id.btn_new_york:  lat = NEW_YORK_LAT;
-                lon = NEW_YORK_LON;
-                break;
-            case R.id.btn_san_francisco:  lat = SAN_FRAN_LAT;
-                lon = SAN_FRAN_LON;
-                break;
-            case R.id.btn_seattle:  lat = SEATTLE_LAT;
-                lon = SEATTLE_LON;
-                break;
-            case R.id.btn_washington_dc:  lat = WASHINGTON_LAT;
-                lon = WASHINGTON_LON;
-                break;
-            default: lat = 36.1088;
-                lon = -112.1171;
-                break;
-        }
 
-        double[] location = {lat, lon};
-        new FetchLandmarkTask().execute(location);
     }
 
 
