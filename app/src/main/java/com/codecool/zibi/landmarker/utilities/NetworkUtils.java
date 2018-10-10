@@ -44,10 +44,21 @@ public final class NetworkUtils {
     private static final String APP_ID_PARAM = "app_id";
     private static final String APP_CODE_PARAM = "app_code";
     private static final String RETRIEVAL_MODE = "retrieveLandmarks";
-    private static final String LOCATION_PARAM = "prox";
+    private static final String HERE_LOCATION_PARAM = "prox";
     private static final String HERE_APP_ID = "9ZPA1cpoeK0TylWh48zU";
     private static final String HERE_APP_CODE = "N8yPHCnNZEazezfYD1E6DA";
     private static final String GMAPS_API_KEY = System.getProperty("GMAPS_API_KEY");
+    private static final String GMAPS_KEY_PARAM = "key";
+    private static final String GMAPS_LOCATION_PARAM = "location";
+    private static final String GMAPS_RADIUS_PARAM = "radius";
+    private static final String GMAPS_RANKBY_PARAM = "rankby";
+    private static final String GMAPS_KEYWORD_PARAM = "keyword";
+    private static final String GMAPS_LANGUAGE_PARAM = "language";
+    private static final String GMAPS_RANKBY_DISTANCE_PARAM = "distance";
+    private static final String GMAPS_RANKBY_IMPORTANCE_PARAM = "prominance";
+
+
+
 
 
     public static URL buildUrlFromSearchphraseForWikipediaAPI(String searchPhrase) {
@@ -77,7 +88,7 @@ public final class NetworkUtils {
 /*                .appendQueryParameter(APP_CODE_PARAM, HERE_APP_CODE)
                 .appendQueryParameter(APP_ID_PARAM, HERE_APP_ID)
                 .appendQueryParameter(FORMAT_PARAM, RETRIEVAL_MODE)*/
-                .appendEncodedPath("reversegeocode.json?" + APP_CODE_PARAM + "=" + HERE_APP_CODE + "&" + APP_ID_PARAM + "=" + HERE_APP_ID + "&" + FORMAT_PARAM + "=" + RETRIEVAL_MODE + "&" + LOCATION_PARAM + "=" + locationData)
+                .appendEncodedPath("reversegeocode.json?" + APP_CODE_PARAM + "=" + HERE_APP_CODE + "&" + APP_ID_PARAM + "=" + HERE_APP_ID + "&" + FORMAT_PARAM + "=" + RETRIEVAL_MODE + "&" + HERE_LOCATION_PARAM + "=" + locationData)
                 .build();
 
         URL url = null;
@@ -93,13 +104,49 @@ public final class NetworkUtils {
     }
 
     public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon) {
-        String locationData = String.valueOf(lat) + "," + String.valueOf(lon) + "1000";
-        return null;
+        String locationData = String.valueOf(lat) + "," + String.valueOf(lon);
+        Uri builtUri = Uri.parse(HERE_BASE_URL).buildUpon()
+                .appendPath(format)
+                .appendQueryParameter(GMAPS_KEY_PARAM, GMAPS_API_KEY)
+                .appendQueryParameter(GMAPS_LOCATION_PARAM, locationData)
+                .appendQueryParameter(GMAPS_RADIUS_PARAM, "1000")
+                .appendQueryParameter(GMAPS_LANGUAGE_PARAM, "hu")
+                .appendQueryParameter(GMAPS_KEYWORD_PARAM, "landmark")
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Log.v(TAG, "Built URI " + url);
+
+        return url;
     }
 
     public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon, int radius) {
-        String locationData = String.valueOf(lat) + "," + String.valueOf(lon) + String.valueOf(radius);
-        return null;
+        String locationData = String.valueOf(lat) + "," + String.valueOf(lon);
+        Uri builtUri = Uri.parse(HERE_BASE_URL).buildUpon()
+                .appendPath(format)
+                .appendQueryParameter(GMAPS_KEY_PARAM, GMAPS_API_KEY)
+                .appendQueryParameter(GMAPS_LOCATION_PARAM, locationData)
+                .appendQueryParameter(GMAPS_RADIUS_PARAM, String.valueOf(radius))
+                .appendQueryParameter(GMAPS_LANGUAGE_PARAM, "hu")
+                .appendQueryParameter(GMAPS_KEYWORD_PARAM, "landmark")
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Log.v(TAG, "Built URI " + url);
+
+        return url;
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
