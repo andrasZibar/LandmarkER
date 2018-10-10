@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.WelcomeActivity">
+
+    <TextView
+        android:id="@+id/welcome_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/welcome_text"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_new_york"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:onClick="showLandmarks"
+        android:text="@string/new_york"
+        app:layout_constraintBottom_toTopOf="@+id/btn_chicago"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcome_text" />
+
+    <Button
+        android:id="@+id/btn_san_francisco"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:onClick="showLandmarks"
+        android:text="@string/san_francisco"
+        app:layout_constraintBottom_toTopOf="@+id/btn_los_angeles"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_chicago" />
+
+    <Button
+        android:id="@+id/btn_los_angeles"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:onClick="showLandmarks"
+        android:text="@string/los_angeles"
+        app:layout_constraintBottom_toTopOf="@+id/btn_washington_dc"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_san_francisco" />
+
+    <Button
+        android:id="@+id/btn_washington_dc"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:onClick="showLandmarks"
+        android:text="@string/washington_dc"
+        app:layout_constraintBottom_toTopOf="@+id/btn_seattle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_los_angeles" />
+
+    <Button
+        android:id="@+id/btn_seattle"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:onClick="showLandmarks"
+        android:text="@string/seattle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_washington_dc" />
+
+    <Button
+        android:id="@+id/btn_chicago"
+        android:layout_width="155sp"
+        android:layout_height="wrap_content"
+        android:onClick="showLandmarks"
+        android:text="@string/chicago"
+        app:layout_constraintBottom_toTopOf="@+id/btn_san_francisco"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_new_york" />
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name" translatable="false">LandmarkER</string>
+    <string name="error_message" translatable="false">Something went wrong, sorry :(</string>
+    <string name="action_refresh" translatable="false">Refresh</string>
+    <string name="wiki_search" translatable="false">Search on Wikipedia</string>
+    <string name="google_maps_search" translatable="false">Find on Google Maps</string>
+    <string name="chicago" translatable="false">Chicago</string>
+    <string name="new_york" translatable="false">New York</string>
+    <string name="los_angeles" translatable="false">Los Angeles</string>
+    <string name="san_francisco" translatable="false">San Francisco</string>
+    <string name="seattle" translatable="false">Seattle</string>
+    <string name="washington_dc" translatable="false">Washington D.C.</string>
+    <string name="welcome_text" translatable="false">Choose the city you\'d like to explore.</string>
+</resources>
