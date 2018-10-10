@@ -34,23 +34,23 @@ public final class NetworkUtils {
 
     private static final String HERE_BASE_URL = "https://reverse.geocoder.api.here.com/6.2";
     private static final String WIKIPEDIA_BASE_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+    private static final String GMAPS_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch";
 
 
     private static final String format = "json";
-    private static final String units = "metric";
-    private static final int numDays = 14;
 
-    final static String QUERY_PARAM = "q";
-    final static String FORMAT_PARAM = "mode";
-    final static String APP_ID_PARAM = "app_id";
-    final static String APP_CODE_PARAM = "app_code";
-    final static String RETRIEVAL_MODE = "retrieveLandmarks";
-    final static String LOCATION_PARAM = "prox";
-    final static String HERE_APP_ID = "9ZPA1cpoeK0TylWh48zU";
-    final static String HERE_APP_CODE = "N8yPHCnNZEazezfYD1E6DA";
+    private static final String QUERY_PARAM = "q";
+    private static final String FORMAT_PARAM = "mode";
+    private static final String APP_ID_PARAM = "app_id";
+    private static final String APP_CODE_PARAM = "app_code";
+    private static final String RETRIEVAL_MODE = "retrieveLandmarks";
+    private static final String LOCATION_PARAM = "prox";
+    private static final String HERE_APP_ID = "9ZPA1cpoeK0TylWh48zU";
+    private static final String HERE_APP_CODE = "N8yPHCnNZEazezfYD1E6DA";
+    private static final String GMAPS_API_KEY = System.getProperty("GMAPS_API_KEY");
 
 
-    public static URL buildUrl(String searchPhrase) {
+    public static URL buildUrlFromSearchphraseForWikipediaAPI(String searchPhrase) {
 
         String wikiCompatibleSearchPhrase = searchPhrase.replace(" ", "_");
 
@@ -71,7 +71,7 @@ public final class NetworkUtils {
     }
 
 
-    public static URL buildUrl(Double lat, Double lon) {
+    public static URL buildUrlFromCoordinatesForHereAPI(Double lat, Double lon) {
         String locationData = String.valueOf(lat) + "," + String.valueOf(lon) + "," + "2000";
         Uri builtUri = Uri.parse(HERE_BASE_URL).buildUpon()
 /*                .appendQueryParameter(APP_CODE_PARAM, HERE_APP_CODE)
@@ -90,6 +90,16 @@ public final class NetworkUtils {
         Log.v(TAG, "Built URI " + url);
 
         return url;
+    }
+
+    public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon) {
+        String locationData = String.valueOf(lat) + "," + String.valueOf(lon) + "1000";
+        return null;
+    }
+
+    public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon, int radius) {
+        String locationData = String.valueOf(lat) + "," + String.valueOf(lon) + String.valueOf(radius);
+        return null;
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {

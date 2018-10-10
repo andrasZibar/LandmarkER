@@ -11,21 +11,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.codecool.zibi.landmarker.R;
-import com.codecool.zibi.landmarker.utilities.HereJsonUtils;
 import com.codecool.zibi.landmarker.utilities.NetworkUtils;
 import com.codecool.zibi.landmarker.utilities.WikipediaJsonUtils;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class LandmarkDetailsActivity extends AppCompatActivity {
 
@@ -81,7 +76,7 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            URL wikiURL = NetworkUtils.buildUrl(strings[0]);
+            URL wikiURL = NetworkUtils.buildUrlFromSearchphraseForWikipediaAPI(strings[0]);
 
             try {
                 String jsonWikiResponse = NetworkUtils
@@ -115,7 +110,7 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(String... strings) {
-            URL wikiURL = NetworkUtils.buildUrl(strings[0]);
+            URL wikiURL = NetworkUtils.buildUrlFromSearchphraseForWikipediaAPI(strings[0]);
             URL thumbnailURLFromJson = null;
 
             try {

@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.codecool.zibi.landmarker.adapters.LandmarkAdapter;
 import com.codecool.zibi.landmarker.R;
@@ -216,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
             double[] location = params[0];
             double lat = location[0];
             double lon = location[1];
-            URL landmarkRequestUrl = NetworkUtils.buildUrl(lat, lon);
+            URL landmarkRequestUrl = NetworkUtils.buildUrlFromCoordinatesForHereAPI(lat, lon);
 
             try {
                 String jsonLandmarkResponse = NetworkUtils
