@@ -10,5 +10,8 @@
     <string name="san_francisco" translatable="false">San Francisco</string>
     <string name="seattle" translatable="false">Seattle</string>
     <string name="washington_dc" translatable="false">Washington D.C.</string>
-    <string name="welcome_text" translatable="false">Choose the city you\'d like to explore.</string>
+    <string name="welcome_text" translatable="false">Welcome to LandmarkER</string>
+    <string name="powered_by" translatable="false">powered by Google Maps</string>
+    <string name="plan_tour">Plan Tour</string>
+    <string name="settings">Settings</string>
 </resources>
