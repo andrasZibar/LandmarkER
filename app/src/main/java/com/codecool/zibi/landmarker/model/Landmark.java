@@ -10,6 +10,11 @@ public class Landmark {
     private String photoID;
     private Image photo;
     private Location requestMadeFrom;
+    public boolean selected = false;
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
     public Landmark(double lat, double lon, String locationID, String name, String photoID, double requestLat, double requestLon) {
         this.locationID = locationID;
