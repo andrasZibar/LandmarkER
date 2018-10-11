@@ -9,15 +9,16 @@ import android.widget.TextView;
 
 import android.widget.Toast;
 import com.codecool.zibi.landmarker.R;
+import com.codecool.zibi.landmarker.model.Landmark;
 
 public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.LandmarkAdapterViewHolder>{
-    private String[] mLandmarkData;
+    private Landmark[] mLandmarkData;
 
     final private LandmarkAdapterOnClickHandler mClickHandler;
     final private LandmarkAdapterOnLongClickHandler mLongClickHandler;
 
     public interface LandmarkAdapterOnClickHandler{
-        void onClick(String landmarkData);
+        void onClick(Landmark landmark);
     }
 
     public interface LandmarkAdapterOnLongClickHandler{
@@ -48,7 +49,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
         @Override
         public void onClick(View view) {
             int adapterPosition = getAdapterPosition();
-            String oneSpecificLandmark = mLandmarkData[adapterPosition];
+            Landmark oneSpecificLandmark = mLandmarkData[adapterPosition];
             mClickHandler.onClick(oneSpecificLandmark);
         }
 
@@ -76,11 +77,13 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
 
     @Override
     public void onBindViewHolder(LandmarkAdapterViewHolder forecastAdapterViewHolder, int position) {
-        String currentLandmarkString = mLandmarkData[position];
-        String landmarkName = currentLandmarkString.substring(0, currentLandmarkString.indexOf('?'));
-        String landmarkDistance = currentLandmarkString.substring(currentLandmarkString.indexOf('?')+1, currentLandmarkString.indexOf('!'));
+        Landmark currentLandmark = mLandmarkData[position];
+        String landmarkName = currentLandmark.getName();
+        float landmarkDistance = currentLandmark.getLocation().distanceTo(currentLandmark.getRequestMadeFrom());
+        Integer distanceInt = ((int) landmarkDistance);
+        String distanceToDisplay = String.valueOf(distanceInt);
         forecastAdapterViewHolder.mLandmarkTextView.setText(landmarkName);
-        forecastAdapterViewHolder.mDistanceTextView.setText(landmarkDistance);
+        forecastAdapterViewHolder.mDistanceTextView.setText(distanceToDisplay);
     }
 
 
@@ -91,7 +94,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
     }
 
 
-    public void setLandmarkData(String[] landmarkData) {
+    public void setLandmarkData(Landmark[] landmarkData) {
         mLandmarkData = landmarkData;
         notifyDataSetChanged();
     }

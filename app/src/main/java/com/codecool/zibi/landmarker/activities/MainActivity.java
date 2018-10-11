@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,14 +37,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.codecool.zibi.landmarker.adapters.LandmarkAdapter;
 import com.codecool.zibi.landmarker.R;
+import com.codecool.zibi.landmarker.model.Landmark;
+import com.codecool.zibi.landmarker.utilities.GmapsJsonUtils;
 import com.codecool.zibi.landmarker.utilities.HereJsonUtils;
 import com.codecool.zibi.landmarker.utilities.NetworkUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.net.URL;
+import java.security.Permission;
+import java.security.Permissions;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
@@ -55,28 +61,6 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     private ProgressBar mLoadingIndicator;
     private FusedLocationProviderClient mFusedLocationClient;
 
-
-    private final double SAN_FRAN_LAT = 37.8075;
-    private final double SAN_FRAN_LON = -122.4725;
-
-    private final double NEW_YORK_LAT = 40.7128;
-    private final double NEW_YORK_LON = -74.0059;
-
-    private final double WASHINGTON_LAT = 38.9073;
-    private final double WASHINGTON_LON = -77.0369;
-
-    private final double LA_LAT = 34.0524;
-    private final double LA_LON = -118.2439;
-
-    private final double SEATTLE_LAT = 47.6061;
-    private final double SEATTLE_LON = -122.3324;
-
-    private final double CHICAGO_LAT = 41.8782;
-    private final double CHICAGO_LON = -87.6301;
-
-    double lat;
-    double lon;
-    int locationID;
 
 
     @Override
@@ -105,16 +89,11 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     private void loadLandmarkData() {
         showLandmarkDataView();
 
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            showErrorMessage();
-            return;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    42);
         }
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -150,11 +129,12 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
 
 
     @Override
-    public void onClick(String landmarkName) {
+    public void onClick(Landmark landmark) {
         Context context = this;
         Class destinationClass = LandmarkDetailsActivity.class;
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
-        intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, landmarkName);
+        intentToStartDetailActivity.putExtra("name", landmark.getName());
+        intentToStartDetailActivity.putExtra("location", landmark.getLocation());
         startActivity(intentToStartDetailActivity);
 
     }
@@ -165,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         return true;
     }
 
-    public class FetchLandmarkTask extends AsyncTask<double[], Void, String[]> {
+    public class FetchLandmarkTask extends AsyncTask<double[], Void, Landmark[]> {
 
         @Override
         protected void onPreExecute() {
@@ -174,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         }
 
         @Override
-        protected String[] doInBackground(double[]... params) {
+        protected Landmark[] doInBackground(double[]... params) {
 
             if (params.length == 0) {
                 return null;
@@ -183,16 +163,15 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
             double[] location = params[0];
             double lat = location[0];
             double lon = location[1];
-            URL landmarkRequestUrl = NetworkUtils.buildUrlFromCoordinatesForHereAPI(lat, lon);
+            URL landmarkRequestUrl = NetworkUtils.buildUrlFromCoordinatesForGmapsAPI(lat, lon);
 
             try {
                 String jsonLandmarkResponse = NetworkUtils
                         .getResponseFromHttpUrl(landmarkRequestUrl);
 
-                String[] simpleJsonLandmarkData = HereJsonUtils
-                        .getSimpleLandmarkStringsFromJson(MainActivity.this, jsonLandmarkResponse);
+                Landmark[] landmarkData = GmapsJsonUtils.getLandmarkObjectsFromJson(jsonLandmarkResponse, lat, lon);
 
-                return simpleJsonLandmarkData;
+                return landmarkData;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -201,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         }
 
         @Override
-        protected void onPostExecute(String[] landmarkData) {
+        protected void onPostExecute(Landmark[] landmarkData) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (landmarkData != null) {
                 showLandmarkDataView();

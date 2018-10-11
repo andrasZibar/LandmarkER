@@ -59,7 +59,7 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
         if (intentThatStartedThisActivity != null) {
             if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) {
 
-                landmarkName = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).substring(0, intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).indexOf('?'));
+                landmarkName = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT);
                 mLandmarkView.setText(landmarkName);
 
                 new FetchWikiContentTask().execute(landmarkName);

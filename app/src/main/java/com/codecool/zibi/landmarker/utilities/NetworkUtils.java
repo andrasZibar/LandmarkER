@@ -47,7 +47,7 @@ public final class NetworkUtils {
     private static final String HERE_LOCATION_PARAM = "prox";
     private static final String HERE_APP_ID = "9ZPA1cpoeK0TylWh48zU";
     private static final String HERE_APP_CODE = "N8yPHCnNZEazezfYD1E6DA";
-    private static final String GMAPS_API_KEY = System.getProperty("GMAPS_API_KEY");
+    private static final String GMAPS_API_KEY = "";
     private static final String GMAPS_KEY_PARAM = "key";
     private static final String GMAPS_LOCATION_PARAM = "location";
     private static final String GMAPS_RADIUS_PARAM = "radius";
@@ -105,7 +105,7 @@ public final class NetworkUtils {
 
     public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon) {
         String locationData = String.valueOf(lat) + "," + String.valueOf(lon);
-        Uri builtUri = Uri.parse(HERE_BASE_URL).buildUpon()
+        Uri builtUri = Uri.parse(GMAPS_BASE_URL).buildUpon()
                 .appendPath(format)
                 .appendQueryParameter(GMAPS_KEY_PARAM, GMAPS_API_KEY)
                 .appendQueryParameter(GMAPS_LOCATION_PARAM, locationData)
@@ -128,7 +128,7 @@ public final class NetworkUtils {
 
     public static URL buildUrlFromCoordinatesForGmapsAPI(Double lat, Double lon, int radius) {
         String locationData = String.valueOf(lat) + "," + String.valueOf(lon);
-        Uri builtUri = Uri.parse(HERE_BASE_URL).buildUpon()
+        Uri builtUri = Uri.parse(GMAPS_BASE_URL).buildUpon()
                 .appendPath(format)
                 .appendQueryParameter(GMAPS_KEY_PARAM, GMAPS_API_KEY)
                 .appendQueryParameter(GMAPS_LOCATION_PARAM, locationData)

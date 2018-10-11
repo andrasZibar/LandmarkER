@@ -9,22 +9,36 @@ public class Landmark {
     private String name;
     private String photoID;
     private Image photo;
+    private Location requestMadeFrom;
 
-    public Landmark(double lat, double lon, String locationID, String name, String photoID) {
+    public Landmark(double lat, double lon, String locationID, String name, String photoID, double requestLat, double requestLon) {
         this.locationID = locationID;
         this.name = name;
         this.photoID = photoID;
         this.location = new Location("");
         this.location.setLatitude(lat);
         this.location.setLongitude(lon);
+        this.requestMadeFrom = new Location("");
+        this.requestMadeFrom.setLatitude(requestLat);
+        this.requestMadeFrom.setLongitude(requestLon);
     }
 
-    public Landmark(Location location, String locationID, String name, String photoID) {
+    public Location getRequestMadeFrom() {
+        return requestMadeFrom;
+    }
+
+    public void setRequestMadeFrom(Location requestMadeFrom) {
+        this.requestMadeFrom = requestMadeFrom;
+    }
+
+    public Landmark(Location location, String locationID, String name, String photoID, Location requestMadeFrom) {
 
         this.location = location;
         this.locationID = locationID;
         this.name = name;
         this.photoID = photoID;
+        this.requestMadeFrom = requestMadeFrom;
+
     }
 
     public Location getLocation() {
