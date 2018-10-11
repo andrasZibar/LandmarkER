@@ -219,6 +219,10 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
             return true;
         }
 
+        if (id == R.id.action_plan_tour) {
+            //TODO: api call
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
