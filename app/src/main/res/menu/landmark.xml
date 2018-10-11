@@ -7,5 +7,16 @@
         android:id="@+id/action_refresh"
         android:orderInCategory="1"
         android:title="@string/action_refresh"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="collapseActionView"/>
+    <item
+            android:id="@+id/action_plan_tour"
+            android:orderInCategory="1"
+            android:title="@string/plan_tour"
+            app:showAsAction="ifRoom"
+            android:visible="false"/>
+    <item
+            android:id="@+id/action_settings"
+            android:orderInCategory="1"
+            android:title="@string/settings"
+            app:showAsAction="collapseActionView"/>
 </menu>
