@@ -57,9 +57,9 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
         String landmarkName;
 
         if (intentThatStartedThisActivity != null) {
-            if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) {
+            if (intentThatStartedThisActivity.hasExtra("name")) {
 
-                landmarkName = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT);
+                landmarkName = intentThatStartedThisActivity.getStringExtra("name");
                 mLandmarkView.setText(landmarkName);
 
                 new FetchWikiContentTask().execute(landmarkName);
@@ -169,9 +169,9 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
         Intent intentThatStartedThisActivity = getIntent();
 
         if (intentThatStartedThisActivity != null) {
-            if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) {
+            if (intentThatStartedThisActivity.hasExtra("name")) {
 
-                addressString = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).substring(0, intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).indexOf('?'));
+                addressString = intentThatStartedThisActivity.getStringExtra("name");
             }
         }
 
@@ -196,9 +196,9 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
         Intent intentThatStartedThisActivity = getIntent();
 
         if (intentThatStartedThisActivity != null) {
-            if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) {
+            if (intentThatStartedThisActivity.hasExtra("name")) {
 
-                addressString = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).substring(0, intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT).indexOf('?'));
+                addressString = intentThatStartedThisActivity.getStringExtra("name");
             }
         }
 

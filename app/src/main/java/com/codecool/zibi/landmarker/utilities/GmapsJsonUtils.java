@@ -1,6 +1,5 @@
 package com.codecool.zibi.landmarker.utilities;
 
-import android.content.Context;
 import android.util.Log;
 import com.codecool.zibi.landmarker.model.Landmark;
 import org.json.JSONArray;
@@ -45,7 +44,14 @@ public final class GmapsJsonUtils {
                     Double lon = currentLandmark.getJSONObject(GMAPS_GEODATA_PARAM).getJSONObject(GMAPS_LOCATION_PARAM).getDouble(GMAPS_LONGITUDE_PARAM);
                     String locationID = currentLandmark.getString(GMAPS_LOCATION_ID_PARAM);
                     String name = currentLandmark.getString(GMAPS_LOCATION_NAME_PARAM);
-                    String photoID = currentLandmark.getJSONArray(GMAPS_LOCATION_PHOTODATA_PARAM).getJSONObject(0).getString(GMAPS_LOCATION_PHOTOID_PARAM);
+                    String photoID;
+                    try {
+                        photoID = currentLandmark.getJSONArray(GMAPS_LOCATION_PHOTODATA_PARAM).getJSONObject(0).getString(GMAPS_LOCATION_PHOTOID_PARAM);
+
+                    } catch (JSONException noPhoto){
+                        Log.e("GmapsJSONReader", noPhoto.getClass().getSimpleName() + noPhoto.getMessage());
+                        photoID = null;
+                    }
 
                     landmarks[i] = new Landmark(lat, lon, locationID, name, photoID, originLat, originLon);
                 }

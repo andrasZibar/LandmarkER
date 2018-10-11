@@ -33,7 +33,7 @@ public final class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     private static final String HERE_BASE_URL = "https://reverse.geocoder.api.here.com/6.2";
-    private static final String WIKIPEDIA_BASE_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+    private static final String WIKIPEDIA_BASE_URL = "https://hu.wikipedia.org/api/rest_v1/page/summary/";
     private static final String GMAPS_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch";
 
 
@@ -66,7 +66,7 @@ public final class NetworkUtils {
         String wikiCompatibleSearchPhrase = searchPhrase.replace(" ", "_");
 
         Uri builtUri = Uri.parse(WIKIPEDIA_BASE_URL).buildUpon()
-                .appendPath(wikiCompatibleSearchPhrase)
+                .appendEncodedPath(wikiCompatibleSearchPhrase)
                 .build();
 
         URL url = null;

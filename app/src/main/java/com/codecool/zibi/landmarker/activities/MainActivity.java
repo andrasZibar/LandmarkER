@@ -27,6 +27,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -100,13 +101,21 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
+                            Log.d("Location data", "success");
                             double[] locationArray = {location.getLatitude(), location.getLongitude()};
                             new FetchLandmarkTask().execute(locationArray);
                         } else {
-                            showErrorMessage();
+                            Log.e("Location data", "location is null");
+                            //showErrorMessage();
                         }
                     }
-                });
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Onfailure location", e.getClass().getSimpleName() + e.getMessage());
+                //showErrorMessage();
+            }
+        });
 
 
 

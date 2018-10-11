@@ -83,7 +83,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
         Integer distanceInt = ((int) landmarkDistance);
         String distanceToDisplay = String.valueOf(distanceInt);
         forecastAdapterViewHolder.mLandmarkTextView.setText(landmarkName);
-        forecastAdapterViewHolder.mDistanceTextView.setText(distanceToDisplay);
+        forecastAdapterViewHolder.mDistanceTextView.setText(distanceToDisplay + " m");
     }
 
 
