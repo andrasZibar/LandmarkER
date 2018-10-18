@@ -1,11 +1,16 @@
 package com.codecool.zibi.landmarker.activities;
 
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +27,15 @@ import com.codecool.zibi.landmarker.utilities.WikipediaJsonUtils;
 import java.io.InputStream;
 import java.net.URL;
 
-public class LandmarkDetailsActivity extends AppCompatActivity {
+public class LandmarkDetailsActivity extends AppCompatActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<Object[]>{
 
     private ImageView mLandmarkThumbnail;
     private ProgressBar mLoadingIndicator;
     private TextView mLandmarkView;
     private Button mWikiButton;
     private Button mGoogleButton;
+    private static final int DETAILS_LOADER_ID = 22;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,88 +69,91 @@ public class LandmarkDetailsActivity extends AppCompatActivity {
                 landmarkName = intentThatStartedThisActivity.getStringExtra("name");
                 mLandmarkView.setText(landmarkName);
 
-                new FetchWikiContentTask().execute(landmarkName);
-                new FetchWikiThumbnailTask().execute(landmarkName);
+                /*new FetchWikiContentTask().execute(landmarkName);
+                new FetchWikiThumbnailTask().execute(landmarkName);*/
+                Bundle queryBundle = new Bundle();
+                queryBundle.putString("landmarkName", landmarkName);
+                getSupportLoaderManager().initLoader(DETAILS_LOADER_ID, queryBundle, LandmarkDetailsActivity.this);
             }
         }
     }
 
-    public class FetchWikiContentTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
+    @SuppressLint("StaticFieldLeak")
+    @NonNull
+    @Override
+    public Loader<Object[]> onCreateLoader(int i, @Nullable final Bundle bundle) {
+        return new AsyncTaskLoader<Object[]>(this) {
+            Object[] mDetailsData = null;
 
-        @Override
-        protected String doInBackground(String... strings) {
-            URL wikiURL = NetworkUtils.buildUrlFromSearchphraseForWikipediaAPI(strings[0]);
-
-            try {
-                String jsonWikiResponse = NetworkUtils
-                        .getResponseFromHttpUrl(wikiURL);
-
-                String wikiContent = WikipediaJsonUtils.getWikipediaContentFromJson(LandmarkDetailsActivity.this, jsonWikiResponse);
-                return wikiContent;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+            @Override
+            protected void onStartLoading() {
+                if (mDetailsData != null) {
+                    deliverResult(mDetailsData);
+                } else {
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
             }
-        }
 
-        @Override
-        protected void onPostExecute(String wikiData) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (wikiData != null) {
-                showWikiDataView();
-                mWikiButton.setText(wikiData);
-            } else {
-                showGoogleButtonWithThumbnail();
+            @Nullable
+            @Override
+            public Object[] loadInBackground() {
+
+                URL wikiURL = NetworkUtils.buildUrlFromSearchphraseForWikipediaAPI(bundle.getString("landmarkName"));
+                URL thumbnailURLFromJson = null;
+                Object[] objects = new Object[2];
+
+                try {
+                    String jsonWikiResponse = NetworkUtils
+                            .getResponseFromHttpUrl(wikiURL);
+
+                    String wikiContent = WikipediaJsonUtils.getWikipediaContentFromJson(LandmarkDetailsActivity.this, jsonWikiResponse);
+                    thumbnailURLFromJson = WikipediaJsonUtils.getWikipediaThumbnailURLFromJson(LandmarkDetailsActivity.this, jsonWikiResponse);
+                    objects[0] = wikiContent;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                Bitmap mIcon11 = null;
+                try {
+                    InputStream in = thumbnailURLFromJson != null ? thumbnailURLFromJson.openStream() : null;
+                    mIcon11 = BitmapFactory.decodeStream(in);
+                    objects[1] = mIcon11;
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+                return objects;
             }
+
+            public void deliverResult(Object[] data) {
+                mDetailsData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Object[]> loader, Object[] objects) {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if (objects[0] != null && objects[1] != null) {
+            showWikiDataView();
+            mWikiButton.setText((CharSequence) objects[0]);
+            mLandmarkThumbnail.setImageBitmap((Bitmap) objects[1]);
+        } else if (objects[1] != null){
+            showGoogleButtonWithThumbnail();
+        } else {
+            showGoogleButtonOnly();
         }
     }
 
-    public class FetchWikiThumbnailTask extends AsyncTask<String, Void, Bitmap> {
-        @Override
-        protected void onPreExecute() {
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
+    @Override
+    public void onLoaderReset(@NonNull Loader<Object[]> loader) {
 
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            URL wikiURL = NetworkUtils.buildUrlFromSearchphraseForWikipediaAPI(strings[0]);
-            URL thumbnailURLFromJson = null;
-
-            try {
-                String jsonWikiResponse = NetworkUtils
-                        .getResponseFromHttpUrl(wikiURL);
-
-                thumbnailURLFromJson = WikipediaJsonUtils.getWikipediaThumbnailURLFromJson(LandmarkDetailsActivity.this, jsonWikiResponse);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = thumbnailURLFromJson != null ? thumbnailURLFromJson.openStream() : null;
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap thumbnail) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (thumbnail != null) {
-                showWikiDataView();
-                mLandmarkThumbnail.setImageBitmap(thumbnail);
-            } else {
-                showGoogleButtonOnly();
-            }
-        }
     }
+
+
 
     void showWikiDataView(){
         mLandmarkThumbnail.setVisibility(View.VISIBLE);
