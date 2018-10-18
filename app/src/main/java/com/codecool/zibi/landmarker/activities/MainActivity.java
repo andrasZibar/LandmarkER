@@ -16,17 +16,19 @@
 package com.codecool.zibi.landmarker.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,12 +40,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import android.widget.Toast;
 import com.codecool.zibi.landmarker.adapters.LandmarkAdapter;
 import com.codecool.zibi.landmarker.R;
 import com.codecool.zibi.landmarker.model.Landmark;
 import com.codecool.zibi.landmarker.utilities.GmapsJsonUtils;
-import com.codecool.zibi.landmarker.utilities.HereJsonUtils;
 import com.codecool.zibi.landmarker.utilities.NetworkUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -52,13 +52,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.net.URL;
-import java.security.Permission;
-import java.security.Permissions;
-import java.util.Arrays;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
-public class MainActivity extends AppCompatActivity implements LandmarkAdapter.LandmarkAdapterOnClickHandler, LandmarkAdapter.LandmarkAdapterOnLongClickHandler {
+public class MainActivity extends AppCompatActivity implements LandmarkAdapter.LandmarkAdapterOnClickHandler,
+        LandmarkAdapter.LandmarkAdapterOnLongClickHandler,
+        android.support.v4.app.LoaderManager.LoaderCallbacks<Landmark[]>
+{
 
     private RecyclerView mRecyclerView;
     private LandmarkAdapter mLandmarkAdapter;
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     private FusedLocationProviderClient mFusedLocationClient;
     private MenuItem mPlanTourItem;
     private double[] locationArray = new double[2];
+    private static final int LANDMARK_LOADER_ID = 21;
 
 
     @Override
@@ -111,7 +112,10 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
                             Log.d("Location data", "success");
                             locationArray[0] = location.getLatitude();
                             locationArray[1] = location.getLongitude();
-                            new FetchLandmarkTask().execute(locationArray);
+
+                            Bundle locationBundle = new Bundle();
+                            locationBundle.putDoubleArray("location", locationArray);
+                            getSupportLoaderManager().initLoader(LANDMARK_LOADER_ID, locationBundle, MainActivity.this);
                         } else {
                             Log.e("Location data", "location is null");
                             //showErrorMessage();
@@ -171,8 +175,8 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     @Override
     public boolean onLongClick(Landmark landmark, View view) {
         for (Landmark lm : mLandmarkAdapter.getLandmarkData()) {
-            if (landmark.selected){
-                landmark.setSelected(false);
+            if (lm.selected){
+                lm.setSelected(false);
             }
         }
 
@@ -180,51 +184,72 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         return false;
     }
 
-    public class FetchLandmarkTask extends AsyncTask<double[], Void, Landmark[]> {
+    @SuppressLint("StaticFieldLeak")
+    @NonNull
+    @Override
+    public Loader<Landmark[]> onCreateLoader(int i, @Nullable final Bundle bundle) {
+        return new AsyncTaskLoader<Landmark[]>(this) {
+            Landmark[] mLandmarkData = null;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
+            @Override
+            protected void onStartLoading() {
+                if (mLandmarkData != null) {
+                    deliverResult(mLandmarkData);
+                } else {
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
+            }
+            @Nullable
+            @Override
+            public Landmark[] loadInBackground() {
+                double[] location = bundle.getDoubleArray("location");
+                if (location == null) {
+                    return null;
+                }
 
-        @Override
-        protected Landmark[] doInBackground(double[]... params) {
+                double lat = location[0];
+                double lon = location[1];
+                URL landmarkRequestUrl = NetworkUtils.buildUrlFromCoordinatesForGmapsAPI(lat, lon);
 
-            if (params.length == 0) {
-                return null;
+                try {
+                    String jsonLandmarkResponse = NetworkUtils
+                            .getResponseFromHttpUrl(landmarkRequestUrl);
+
+                    Landmark[] landmarkData = GmapsJsonUtils.getLandmarkObjectsFromJson(jsonLandmarkResponse, lat, lon);
+
+                    return landmarkData;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
 
-            double[] location = params[0];
-            double lat = location[0];
-            double lon = location[1];
-            URL landmarkRequestUrl = NetworkUtils.buildUrlFromCoordinatesForGmapsAPI(lat, lon);
-
-            try {
-                String jsonLandmarkResponse = NetworkUtils
-                        .getResponseFromHttpUrl(landmarkRequestUrl);
-
-                Landmark[] landmarkData = GmapsJsonUtils.getLandmarkObjectsFromJson(jsonLandmarkResponse, lat, lon);
-
-                return landmarkData;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+            public void deliverResult(Landmark[] data) {
+                mLandmarkData = data;
+                super.deliverResult(data);
             }
-        }
+        };
+    }
 
-        @Override
-        protected void onPostExecute(Landmark[] landmarkData) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (landmarkData != null) {
-                showLandmarkDataView();
-                mLandmarkAdapter.setLandmarkData(landmarkData);
-            } else {
-                showErrorMessage();
-            }
+    @Override
+    public void onLoadFinished(@NonNull Loader<Landmark[]> loader, Landmark[] landmarks) {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if (landmarks != null) {
+            showLandmarkDataView();
+            mLandmarkAdapter.setLandmarkData(landmarks);
+        } else {
+            showErrorMessage();
         }
     }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Landmark[]> loader) {
+
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
