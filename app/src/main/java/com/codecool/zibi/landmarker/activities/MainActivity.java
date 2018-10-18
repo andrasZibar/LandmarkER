@@ -19,7 +19,10 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -51,6 +54,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.net.URL;
 import java.security.Permission;
 import java.security.Permissions;
+import java.util.Arrays;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
@@ -61,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
     private FusedLocationProviderClient mFusedLocationClient;
-
+    private MenuItem mPlanTourItem;
+    private double[] locationArray = new double[2];
 
 
     @Override
@@ -87,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
     }
 
 
+
+
     private void loadLandmarkData() {
         showLandmarkDataView();
 
@@ -102,7 +109,8 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
                     public void onSuccess(Location location) {
                         if (location != null) {
                             Log.d("Location data", "success");
-                            double[] locationArray = {location.getLatitude(), location.getLongitude()};
+                            locationArray[0] = location.getLatitude();
+                            locationArray[1] = location.getLongitude();
                             new FetchLandmarkTask().execute(locationArray);
                         } else {
                             Log.e("Location data", "location is null");
@@ -136,22 +144,40 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
+    private void showCheckBoxesForLandmarks(){
+    }
+
 
     @Override
-    public void onClick(Landmark landmark) {
+    public void onClick(Landmark landmark, View view) {
         Context context = this;
-        Class destinationClass = LandmarkDetailsActivity.class;
-        Intent intentToStartDetailActivity = new Intent(context, destinationClass);
-        intentToStartDetailActivity.putExtra("name", landmark.getName());
-        intentToStartDetailActivity.putExtra("location", landmark.getLocation());
-        startActivity(intentToStartDetailActivity);
+        if (mPlanTourItem.isVisible()){
+            //TODO: logic for checkboxes: make method
+            //view.getBackground().setColorFilter(Color.parseColor("#00ff00"), PorterDuff.Mode.LIGHTEN);
+            landmark.setSelected(true);
+            view.refreshDrawableState();
+        } else {
+            Class destinationClass = LandmarkDetailsActivity.class;
+            Intent intentToStartDetailActivity = new Intent(context, destinationClass);
+            intentToStartDetailActivity.putExtra("name", landmark.getName());
+            intentToStartDetailActivity.putExtra("location", landmark.getLocation());
+            startActivity(intentToStartDetailActivity);
+        }
+
+
 
     }
 
     @Override
-    public boolean onLongClick(Toast toast) {
-        toast.show();
-        return true;
+    public boolean onLongClick(Landmark landmark, View view) {
+        for (Landmark lm : mLandmarkAdapter.getLandmarkData()) {
+            if (landmark.selected){
+                landmark.setSelected(false);
+            }
+        }
+
+        mPlanTourItem.setVisible(true);
+        return false;
     }
 
     public class FetchLandmarkTask extends AsyncTask<double[], Void, Landmark[]> {
@@ -205,6 +231,8 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         MenuInflater inflater = getMenuInflater();
 
         inflater.inflate(R.menu.landmark, menu);
+        mPlanTourItem = menu.findItem(R.id.action_plan_tour);
+        mPlanTourItem.setVisible(false);
 
         return true;
     }
@@ -221,6 +249,34 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
 
         if (id == R.id.action_plan_tour) {
             //TODO: api call
+            String mapsUrl = "http://maps.google.com/maps?daddr=";
+            String currentLocation = String.valueOf(locationArray[0]) + "," + String.valueOf(locationArray[1]);
+            String baseUrl = mapsUrl + currentLocation;
+            StringBuilder geolocationsQueryString = new StringBuilder(baseUrl);
+
+            for (Landmark landmark : mLandmarkAdapter.getLandmarkData()) {
+                if (landmark.selected){
+                    Location location = landmark.getLocation();
+                    geolocationsQueryString.append("+to:");
+                    geolocationsQueryString.append(String.valueOf(location.getLatitude()));
+                    geolocationsQueryString.append(',');
+                    geolocationsQueryString.append(String.valueOf(location.getLongitude()));
+                    landmark.setSelected(false);
+                }
+            }
+
+            Uri addressUri = Uri.parse(geolocationsQueryString.toString());
+            System.out.println("GEOURIMULTIPLEPOINT: " + addressUri.toString());
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+
+
+            intent.setData(addressUri);
+
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                mPlanTourItem.setVisible(false);
+                startActivity(intent);
+            }
         }
 
         return super.onOptionsItemSelected(item);

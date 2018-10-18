@@ -18,11 +18,11 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
     final private LandmarkAdapterOnLongClickHandler mLongClickHandler;
 
     public interface LandmarkAdapterOnClickHandler{
-        void onClick(Landmark landmark);
+        void onClick(Landmark landmark, View view);
     }
 
     public interface LandmarkAdapterOnLongClickHandler{
-        boolean onLongClick(Toast toast);
+        boolean onLongClick(Landmark landmark, View view);
     }
 
 
@@ -50,14 +50,14 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
         public void onClick(View view) {
             int adapterPosition = getAdapterPosition();
             Landmark oneSpecificLandmark = mLandmarkData[adapterPosition];
-            mClickHandler.onClick(oneSpecificLandmark);
+            mClickHandler.onClick(oneSpecificLandmark, view);
         }
 
         @Override
         public boolean onLongClick(View v) {
             int adapterPosition = getAdapterPosition();
-            Toast toast = Toast.makeText(v.getContext(), "Adapterpozi: " + adapterPosition, Toast.LENGTH_LONG);
-            mLongClickHandler.onLongClick(toast);
+            Landmark oneSpecificLandmark = mLandmarkData[adapterPosition];
+            mLongClickHandler.onLongClick(oneSpecificLandmark, v);
             return true;
         }
     }
@@ -97,5 +97,9 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.Landma
     public void setLandmarkData(Landmark[] landmarkData) {
         mLandmarkData = landmarkData;
         notifyDataSetChanged();
+    }
+
+    public  Landmark[] getLandmarkData(){
+        return mLandmarkData;
     }
 }

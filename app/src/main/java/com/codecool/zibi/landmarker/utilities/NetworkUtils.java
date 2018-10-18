@@ -109,7 +109,7 @@ public final class NetworkUtils {
                 .appendPath(format)
                 .appendQueryParameter(GMAPS_KEY_PARAM, GMAPS_API_KEY)
                 .appendQueryParameter(GMAPS_LOCATION_PARAM, locationData)
-                .appendQueryParameter(GMAPS_RADIUS_PARAM, "1000")
+                .appendQueryParameter(GMAPS_RADIUS_PARAM, "1500")
                 .appendQueryParameter(GMAPS_LANGUAGE_PARAM, "hu")
                 .appendQueryParameter(GMAPS_KEYWORD_PARAM, "landmark")
                 .build();
