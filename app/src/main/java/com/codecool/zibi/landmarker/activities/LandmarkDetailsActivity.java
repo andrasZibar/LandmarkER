@@ -127,7 +127,7 @@ public class LandmarkDetailsActivity extends AppCompatActivity implements androi
                 return objects;
             }
 
-            public void deliverResult(Object[] data) {
+            public void deliverResult(@Nullable Object[] data) {
                 mDetailsData = data;
                 super.deliverResult(data);
             }
@@ -135,16 +135,16 @@ public class LandmarkDetailsActivity extends AppCompatActivity implements androi
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<Object[]> loader, Object[] objects) {
+    public void onLoadFinished(@NonNull Loader<Object[]> loader, @Nullable Object[] objects) {
         mLoadingIndicator.setVisibility(View.INVISIBLE);
-        if (objects[0] != null && objects[1] != null) {
+        if (objects == null){
+            showGoogleButtonOnly();
+        } else if (objects[0] != null && objects[1] != null){
             showWikiDataView();
             mWikiButton.setText((CharSequence) objects[0]);
             mLandmarkThumbnail.setImageBitmap((Bitmap) objects[1]);
         } else if (objects[1] != null){
             showGoogleButtonWithThumbnail();
-        } else {
-            showGoogleButtonOnly();
         }
     }
 
