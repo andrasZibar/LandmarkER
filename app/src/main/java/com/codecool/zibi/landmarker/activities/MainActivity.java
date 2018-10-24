@@ -52,6 +52,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
@@ -273,21 +275,33 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         }
 
         if (id == R.id.action_plan_tour) {
-            //TODO: api call
+            Location startingPoint = new Location("");
+            startingPoint.setLatitude(locationArray[0]);
+            startingPoint.setLongitude(locationArray[1]);
             String mapsUrl = "http://maps.google.com/maps?daddr=";
-            String currentLocation = String.valueOf(locationArray[0]) + "," + String.valueOf(locationArray[1]);
+            String currentLocation = String.valueOf(startingPoint.getLatitude()) + "," + String.valueOf(startingPoint.getLongitude());
             String baseUrl = mapsUrl + currentLocation;
             StringBuilder geolocationsQueryString = new StringBuilder(baseUrl);
 
+            List<Landmark> selectedLandmarks = new ArrayList<>();
+
+
             for (Landmark landmark : mLandmarkAdapter.getLandmarkData()) {
                 if (landmark.selected){
-                    Location location = landmark.getLocation();
-                    geolocationsQueryString.append("+to:");
-                    geolocationsQueryString.append(String.valueOf(location.getLatitude()));
-                    geolocationsQueryString.append(',');
-                    geolocationsQueryString.append(String.valueOf(location.getLongitude()));
-                    landmark.setSelected(false);
+                    selectedLandmarks.add(landmark);
                 }
+            }
+
+            List<Landmark> orderedLandmarkList = new ArrayList<>();
+            makeOrderedLandmarkListByNearestNeighbor(selectedLandmarks, orderedLandmarkList, startingPoint);
+
+            for (Landmark landmark : orderedLandmarkList) {
+                Location location = landmark.getLocation();
+                geolocationsQueryString.append("+to:");
+                geolocationsQueryString.append(String.valueOf(location.getLatitude()));
+                geolocationsQueryString.append(',');
+                geolocationsQueryString.append(String.valueOf(location.getLongitude()));
+                landmark.setSelected(false);
             }
 
             Uri addressUri = Uri.parse(geolocationsQueryString.toString());
@@ -305,6 +319,34 @@ public class MainActivity extends AppCompatActivity implements LandmarkAdapter.L
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void makeOrderedLandmarkListByNearestNeighbor(List<Landmark> landmarks, List<Landmark> orderedLandmarks, Location startingPoint){
+
+        if (landmarks.isEmpty()){
+            return;
+        }
+
+        if (landmarks.size() == 1){
+            orderedLandmarks.add(landmarks.remove(0));
+            return;
+        }
+
+        Float minDistance = 100000F;
+        Landmark closestLandmark = null;
+        for (Landmark landmark:landmarks) {
+            Location location = landmark.getLocation();
+            float[] dist = new float[1];
+            Location.distanceBetween(startingPoint.getLatitude(), startingPoint.getLongitude(), location.getLatitude(), location.getLongitude(), dist);
+            if (dist[0] < minDistance){
+                minDistance = dist[0];
+                closestLandmark = landmark;
+            }
+        }
+        Landmark currentLandmark = landmarks.remove(landmarks.indexOf(closestLandmark));
+        orderedLandmarks.add(currentLandmark);
+        makeOrderedLandmarkListByNearestNeighbor(landmarks, orderedLandmarks, currentLandmark.getLocation());
+
     }
 
     public void showDetails(View view) {
